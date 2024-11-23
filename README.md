@@ -194,3 +194,48 @@ Son olarak tanımlanmış olan bu politikanın hangi hedef servisle ilişkili ol
   ```
 
 Böylece API Gateway uygulamasında authentication ve authorization'ı yapılandırmış bulunuyoruz. Bu yapılandırmalara uygun bir şekilde servislere erişim göstermek isteniyorsa eğer alt servislerde de benzer şekilde  yapılandırmada bulunulması gerekmektedir.
+
+### 5. YARP ile Load Balancing:
+
+  ```json
+  "ReverseProxy": {
+    "Routes": {
+      "Cluster1": {
+        "ClusterId": "Cluster1",
+        "AuthorizationPolicy": "Authenticated",
+        "Match": {
+          "Path": "/api1/{**catch-all}"
+        },
+        "Transforms": [
+          {
+            "RequestHeader": "api1-request-header",
+            "Append": "api1 request"
+          },
+          {
+            "ResponseHeader": "api1-response-header",
+            "Append": "api1 response",
+            "When": "Always"
+          }
+        ]
+      },
+    },
+    "Clusters": {
+      "Cluster1": {
+        "Destinations": {
+          "destination1": {
+            "Address": "https://localhost:7222"
+          },
+          "destination2": {
+            "Address": "https://localhost:7223"
+          },
+          "destination3": {
+            "Address": "https://localhost:7224"
+          }
+        },
+        "LoadBalancing": {
+          "Policy": "RoundRobin"
+        }
+      }
+    }
+  }
+  ```
